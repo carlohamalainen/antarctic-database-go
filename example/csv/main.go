@@ -8,15 +8,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/carlohamalainen/antarctic-database-go"
+	ats "github.com/carlohamalainen/antarctic-database-go"
 )
 
 func main() {
-	meetingType := api.MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting
-	meeting := api.Meeting_Integer_ATCM_XII_Canberra_1983
-	party := api.Party_All
-	paperType := api.PaperType_WP
-	category := api.Category_All
+	meetingType := ats.MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting
+	meeting := ats.Meeting_Integer_ATCM_XII_Canberra_1983
+	party := ats.Party_All
+	paperType := ats.PaperType_WP
+	category := ats.Category_All
 
 	page := 1
 
@@ -26,7 +26,7 @@ func main() {
 	rows = append(rows, header)
 
 	for page > 0 {
-		url := api.BuildSearchMeetingDocuments(meetingType, meeting, party, paperType, category, page)
+		url := ats.BuildSearchMeetingDocuments(meetingType, meeting, party, paperType, category, page)
 
 		resp, err := http.Get(url)
 		if err != nil {
@@ -34,7 +34,7 @@ func main() {
 		}
 		defer resp.Body.Close()
 
-		document := api.Document{}
+		document := ats.Document{}
 		if err := json.NewDecoder(resp.Body).Decode(&document); err != nil {
 			panic(err)
 		}

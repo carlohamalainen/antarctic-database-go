@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/carlohamalainen/antarctic-database-go"
+	ats "github.com/carlohamalainen/antarctic-database-go"
 )
 
 func main() {
@@ -15,13 +15,13 @@ func main() {
 	//
 	// https://www.ats.aq/devAS/Meetings/Measure/813?s=1&iframe=1&from=05/30/2024&to=05/30/2024&cat=1&top=163&type=2&stat=3&txt=&curr=0
 
-	meeting := api.Meeting_Date_ATCM_46_CEP_26_Kochi_2024
-	cat := api.Cat_Area_protection_and_management
-	topic := api.Topic_ASPA_116_New_College_Valley
-	docType := api.DocType_Measure
-	status := api.Status_Not_yet_effective
+	meeting := ats.Meeting_Date_ATCM_46_CEP_26_Kochi_2024
+	cat := ats.Cat_Area_protection_and_management
+	topic := ats.Topic_ASPA_116_New_College_Valley
+	docType := ats.DocType_Measure
+	status := ats.Status_Not_yet_effective
 
-	url := api.BuildSearchURL(
+	url := ats.BuildSearchURL(
 		meeting,
 		cat,
 		topic,
@@ -38,14 +38,14 @@ func main() {
 	}
 	defer resp.Body.Close()
 
-	document := api.Treaty{}
+	document := ats.Treaty{}
 	if err := json.NewDecoder(resp.Body).Decode(&document); err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("%+v\n", document)
 
-	url2 := api.BuildSecondURL(
+	url2 := ats.BuildSecondURL(
 		meeting,
 		cat,
 		topic,
@@ -65,7 +65,7 @@ func main() {
 		panic(fmt.Sprintf("bad response code %d on %s", resp.StatusCode, url2))
 	}
 
-	measure := api.ParseMeasure(url2, resp.Body)
+	measure := ats.ParseMeasure(url2, resp.Body)
 
 	fmt.Printf("%+v\n", measure)
 }
