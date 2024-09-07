@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/carlohamalainen/antarctic-database-go"
+	ats "github.com/carlohamalainen/antarctic-database-go"
 )
 
 func main() {
-	meetingType := api.MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting
-	meeting := api.Meeting_Integer_ATCM_46_CEP_26_Kochi_2024
-	party := api.Party_COMNAP
-	paperType := api.PaperType_IP
-	category := api.Category_Safety_and_Operations_in_Antarctica
+	meetingType := ats.MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting
+	meeting := ats.Meeting_Integer_ATCM_46_CEP_26_Kochi_2024
+	party := ats.Party_COMNAP
+	paperType := ats.PaperType_IP
+	category := ats.Category_Safety_and_Operations_in_Antarctica
 
 	page := 1
 
 	for page > 0 {
-		url := api.BuildSearchMeetingDocuments(meetingType, meeting, party, paperType, category, page)
+		url := ats.BuildSearchMeetingDocuments(meetingType, meeting, party, paperType, category, page)
 
 		fmt.Println(url)
 
@@ -28,7 +28,7 @@ func main() {
 		}
 		defer resp.Body.Close()
 
-		document := api.Document{}
+		document := ats.Document{}
 		if err := json.NewDecoder(resp.Body).Decode(&document); err != nil {
 			panic(err)
 		}
@@ -38,10 +38,10 @@ func main() {
 		fmt.Println(len(document.Payload))
 
 		for _, item := range document.Payload {
-			downloadURLs := api.DownloadLinks(item)
+			downloadURLs := ats.DownloadLinks(item)
 
 			for _, downloadURL := range downloadURLs {
-				valid, err := api.ValidateDocumentLink(downloadURL.Url)
+				valid, err := ats.ValidateDocumentLink(downloadURL.Url)
 				if err != nil {
 					panic(err)
 				}
@@ -54,9 +54,9 @@ func main() {
 			fmt.Printf("PARTIES: %+v\n", item.Parties)
 
 			for _, attachment := range item.Attachments {
-				attachmentURL := api.AttachmentLink(attachment)
+				attachmentURL := ats.AttachmentLink(attachment)
 
-				valid, err := api.ValidateDocumentLink(attachmentURL.Url)
+				valid, err := ats.ValidateDocumentLink(attachmentURL.Url)
 				if err != nil {
 					panic(err)
 				}
