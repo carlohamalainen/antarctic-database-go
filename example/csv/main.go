@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	ats "github.com/carlohamalainen/antarctic-database-go"
+	"github.com/carlohamalainen/antarctic-database-go"
 )
 
 func main() {

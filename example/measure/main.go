@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	ats "github.com/carlohamalainen/antarctic-database-go"
+	"github.com/carlohamalainen/antarctic-database-go"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	docType := ats.DocType_Measure
 	status := ats.Status_Not_yet_effective
 
-	url := ats.BuildSearchURL(
+	url := ats.BuildTreatySearchUrl(
 		meeting,
 		cat,
 		topic,
@@ -45,7 +45,7 @@ func main() {
 
 	fmt.Printf("%+v\n", document)
 
-	url2 := ats.BuildSecondURL(
+	url2 := ats.BuildMeasureSearchUrl(
 		meeting,
 		cat,
 		topic,
