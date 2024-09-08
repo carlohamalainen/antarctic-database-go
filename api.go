@@ -131,16 +131,69 @@ func ParseMeasure(url string, body io.ReadCloser) Measure {
 	return m
 }
 
-func BuildSearchURL(meeting Meeting_Date, cat Cat, topic Topic, docType DocType, status Status, page int) string {
+// BuildTreatySearchUrl constructs a URL for searching the Antarctic Treaty System database.
+//
+// It takes the following parameters:
+//   - meeting: The Meeting_Date for the search period (used for both 'from' and 'to' fields).
+//   - cat: The Cat (category) of documents to search for.
+//   - topic: The Topic to filter the search results.
+//   - docType: The DocType (document type) to include in the search.
+//   - status: The Status of documents to include.
+//   - page: The page number for paginated results (starting from 1).
+//
+// The function returns a string containing the full URL with all parameters properly encoded.
+//
+// Example usage:
+//
+//	url := BuildTreatySearchUrl(Meeting_Date_ATCM_46_CEP_26_Kochi_2024,
+// 								Cat_Area_protection_and_management,
+// 								Topic_ASPA_116_New_College_Valley,
+// 								DocType_Measure,
+// 								Status_Not_yet_effective,
+//								1,)
+//
+// Then unmarshal the json response into a Treaty.
+//
+// Note: This function uses predefined constants TXT and CURR for the 'txt' and 'curr' URL parameters.
+func BuildTreatySearchUrl(meeting Meeting_Date, cat Cat, topic Topic, docType DocType, status Status, page int) string {
 	return fmt.Sprintf("https://www.ats.aq/devAS/ToolsAndResources/SearchDatabase?from=%s&to=%s&cat=%s&top=%s&type=%s&stat=%s&txt=%s&curr=%s&page=%d",
 		meeting, meeting, cat, topic, docType, status, TXT, CURR, page)
 }
 
-func BuildSecondURL(meeting Meeting_Date, cat Cat, topic Topic, docType DocType, status Status, aRecID int) string {
+// BuildMeasureSearchUrl constructs a URL for searching measures in the Antarctic Treaty System database.
+//
+// First use BuildTreatySearchUrl to get a Treaty. Then, given a recommendation ID `aRecID` from
+// TreatyPayloadItem, use this function to get the url to the meeting document.
+//
+// The html response can be parsed with ParseMeasure.
+func BuildMeasureSearchUrl(meeting Meeting_Date, cat Cat, topic Topic, docType DocType, status Status, aRecID int) string {
 	return fmt.Sprintf("https://www.ats.aq/devAS/Meetings/Measure/%d?s=1&iframe=1&from=%s&to=%s&cat=%s&top=%s&type=%s&stat=%s&txt=%s&curr=%s",
 		aRecID, meeting, meeting, cat, topic, docType, status, TXT, CURR)
 }
 
+// BuildSearchMeetingDocuments constructs a URL for searching meeting documents in the Antarctic Treaty System database.
+//
+// Parameters:
+//   - meetingType: The MeetingType to filter the search results.
+//   - meeting: The Meeting_Integer representing both the 'from' and 'to' date range for the meeting.
+//   - party: The Party (country or organization) associated with the documents.
+//   - paperType: The PaperType to include in the search.
+//   - category: The Category of documents to search for.
+//   - page: The page number for paginated results.
+//
+// The function returns a string containing the full URL with all parameters properly encoded.
+//
+// Example usage:
+//
+//	url := BuildSearchMeetingDocuments(
+// 						MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting,
+// 						Meeting_Integer_ATCM_46_CEP_26_Kochi_2024,
+// 						Party_COMNAP,
+// 						PaperType_IP,
+// 						Category_Safety_and_Operations_in_Antarctica,
+// 						1,)
+//
+// Note: This function sets an empty value for the 'title' parameter in the URL.
 func BuildSearchMeetingDocuments(meetingType MeetingType, meeting Meeting_Integer, party Party, paperType PaperType, category Category, page int) string {
 	return fmt.Sprintf(
 		"https://www.ats.aq/devAS/Meetings/SearchDocDatabase?meeting=%s&from=%s&to=%s&party=%s&type=%s&category=%s&title=&page=%d",
@@ -153,6 +206,7 @@ func BuildSearchMeetingDocuments(meetingType MeetingType, meeting Meeting_Intege
 		page)
 }
 
+// DownloadLinks extracts document (e.g. PDF, doc, docx) download urls from a DocumentPayloadItem. All four languages are supported.
 func DownloadLinks(paper DocumentPayloadItem) []DocumentLink {
 	docs := []DocumentLink{}
 
@@ -184,6 +238,8 @@ func DownloadLinks(paper DocumentPayloadItem) []DocumentLink {
 	return docs
 }
 
+// AttachmentLink extracts an DocumentLink for a single attachment DocumentPayloadItemAttachmentsItem.
+// An attachment refers to a single document (single language).
 func AttachmentLink(attachment DocumentPayloadItemAttachmentsItem) DocumentLink {
 	docPath := "https://documents.ats.aq/"
 
@@ -222,6 +278,25 @@ func AttachmentLink(attachment DocumentPayloadItemAttachmentsItem) DocumentLink 
 	return dl
 }
 
+// ValidateDocumentLink checks if a given URL points to a valid document.
+//
+// This function performs the following checks:
+//   1. Sends a HEAD request to the URL.
+//   2. Verifies that the response status code is 200 (OK).
+//   3. Checks if the Content-Type of the response matches doc, docx, pdf, zip, png.
+//
+// Parameters:
+//   - url: The URL string to validate.
+//
+// Returns:
+//   - bool: true if the URL points to a valid document, false otherwise.
+//   - error: nil if the validation process completed without errors,
+//     or an http error.
+//
+// The function will return (false, nil) if the URL is reachable but doesn't
+// point to a document of the expected types.
+//
+// Note: This function uses a timeout of 10 seconds for the HTTP request.
 func ValidateDocumentLink(url string) (bool, error) {
 	client := &http.Client{
 		Timeout: 10 * time.Second,

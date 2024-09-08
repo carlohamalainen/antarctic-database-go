@@ -40,6 +40,8 @@ Starting with `v1.0.0` of antarctic-database-go, Go 1.23+ is required.
 
 ## Changelog
 
+*    **2024-09-09 (v1.0.2)** : Tag version 1.0.2.
+*    **2024-09-09** : Documentation, tidyup.
 *    **2024-09-07 (v1.0.1)** : Tag version 1.0.1.
 *    **2024-09-07** Change package name from `api` to `ats`.
 *    **2024-09-07 (v1.0.0)** : Tag version 1.0.0.
@@ -47,19 +49,102 @@ Starting with `v1.0.0` of antarctic-database-go, Go 1.23+ is required.
 
 ## API
 
-antarctic-database-go exposes ... TODO
-
 The complete [package reference documentation can be found here][doc].
+
+[api.go](./api.go) has the main API. Use this for constructing URLs to the treaties, measures (recommendations), and meeting documents.
+
+[metadata.go](./metadata.go) is an auto-generated module with metadata for searching. For example it defines constants for meetings:
+
+```go
+type Meeting_Date string
+
+const (
+	Meeting_Date_ATCM_46_CEP_26_Kochi_2024                Meeting_Date = "05/30/2024"
+	Meeting_Date_ATCM_III_Brussels_1964                   Meeting_Date = "06/13/1964"
+	Meeting_Date_ATCM_II_Buenos_Aires_1962                Meeting_Date = "07/28/1962"
+	Meeting_Date_ATCM_IV_Santiago_1966                    Meeting_Date = "11/18/1966"
+	Meeting_Date_ATCM_IX_London_1977                      Meeting_Date = "10/07/1977"
+	Meeting_Date_ATCM_I_Canberra_1961                     Meeting_Date = "07/24/1961"
+  // many more lines...
+)
+```
+
+and a list of all meetings:
+
+```go
+var Meeting_DateKeys []Meeting_Date = []Meeting_Date{Meeting_Date_ATCM_46_CEP_26_Kochi_2024, Meeting_Date_ATCM_III_Brussels_1964, Meeting_Date_ATCM_II_Buenos_Aires_1962,
+  // many more lines
+}
+```
+and a convenient function to show a meeting:
+
+```go
+func Meeting_DateToString(m Meeting_Date) string {
+	switch m {
+	case Meeting_Date_ATCM_46_CEP_26_Kochi_2024:
+		return "Meeting_Date_ATCM_46_CEP_26_Kochi_2024"
+	case Meeting_Date_ATCM_III_Brussels_1964:
+		return "Meeting_Date_ATCM_III_Brussels_1964"
+  // many more lines
+```
+
+[structs.go](./structs.go) has auto-generated structures for json responses. For example, meeting document responses can be unmarshalled
+to a `Document` which has a pager and a payload. Pages start at `1` and a `DocumentPager.Next` of 0 indicates the final page.
+
+```go
+type Document struct {
+	Pager   DocumentPager         `json:"pager"`
+	Payload []DocumentPayloadItem `json:"payload"`
+}
+
+type DocumentPager struct {
+	Lastpage int                      `json:"lastPage"`
+	Next     int                      `json:"next"`
+	Page     int                      `json:"page"`
+	Pages    []DocumentPagerPagesItem `json:"pages"`
+	Perpage  int                      `json:"perPage"`
+	Prev     int                      `json:"prev"`
+	Total    int                      `json:"total"`
+}
+
+type DocumentPayloadItem struct {
+	Abbreviation   string                               `json:"Abbreviation"`
+	Acronym_en     string                               `json:"Acronym_en"`
+	Agendas        []DocumentPayloadItemAgendasItem     `json:"Agendas"`
+	Attachments    []DocumentPayloadItemAttachmentsItem `json:"Attachments"`
+	Isbusy         bool                                 `json:"IsBusy"`
+	Isselfbusy     bool                                 `json:"IsSelfBusy"`
+	Meeting_city   string                               `json:"Meeting_city"`
+	Meeting_id     int                                  `json:"Meeting_id"`
+	Meeting_name   string                               `json:"Meeting_name"`
+	Meeting_number string                               `json:"Meeting_number"`
+	Meeting_type   string                               `json:"Meeting_type"`
+	Meeting_year   int                                  `json:"Meeting_year"`
+	Name           string                               `json:"Name"`
+	Number         int                                  `json:"Number"`
+	Pap_type_id    int                                  `json:"Pap_type_id"`
+	Paper_id       int                                  `json:"Paper_id"`
+	Parties        []DocumentPayloadItemPartiesItem     `json:"Parties"`
+	Revision       int                                  `json:"Revision"`
+	State_en       int                                  `json:"State_en"`
+	State_fr       int                                  `json:"State_fr"`
+	State_ru       int                                  `json:"State_ru"`
+	State_sp       int                                  `json:"State_sp"`
+	Type           string                               `json:"Type"`
+}
+```
 
 ## Examples
 
-TODO
+[example/measure](./example/measure/): search and parse measures.
 
-See the [examples directory](./example/).
+[example/downloads](./example/downloads/): search and validate meeting documents
+
+[example/csv](./example/csv/): search meeting documents and produce simple CSV output.
 
 ## Related Projects
 
-- [ats-papers](https://github.com/gcuth/ats-papers), a Python pipeline for scraping and analysing Antarctic Treaty Papers. As of 2021, archived.
+- [ats-papers](https://github.com/gcuth/ats-papers), a Python pipeline for scraping and analysing Antarctic Treaty Papers. Archived repository.
 
 ## Support
 
