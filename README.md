@@ -4,7 +4,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/carlohamalainen/antarctic-database-go.svg)](https://pkg.go.dev/github.com/carlohamalainen/antarctic-database-go)
 [![Sourcegraph Badge](https://sourcegraph.com/github.com/carlohamalainen/antarctic-database-go/-/badge.svg)](https://sourcegraph.com/github.com/carlohamalainen/antarctic-database-go?badge)
 
-antarctic-database-go provides a simple API for querying documents and measures in the [ATS Datbase][atsdb].
+antarctic-database-go provides a simple API for querying documents and measures in the [ATS Database][atsdb].
 Specifically, we support the _Antarctic Treaty Database_ and _Meeting Documents_ databases.
 
 [Antarctic Treaty Database search page][treatydb] description:
