@@ -298,7 +298,6 @@ var (
 	}
 
 	MeetingsDocDatabaseScrapeTarget = ScrapeTarget{
-		// Url: "https://www.ats.aq/devAS/ToolsAndResources/SearchAtd",
 		Url: "https://www.ats.aq/devAS/Meetings/DocDatabase",
 		Targets: []GenerateTarget{
 			{
