@@ -146,10 +146,10 @@ func ParseMeasure(url string, body io.ReadCloser) Measure {
 // Example usage:
 //
 //	url := BuildTreatySearchUrl(Meeting_Date_ATCM_46_CEP_26_Kochi_2024,
-// 								Cat_Area_protection_and_management,
-// 								Topic_ASPA_116_New_College_Valley,
-// 								DocType_Measure,
-// 								Status_Not_yet_effective,
+//								Cat_Area_protection_and_management,
+//								Topic_ASPA_116_New_College_Valley,
+//								DocType_Measure,
+//								Status_Not_yet_effective,
 //								1,)
 //
 // Then unmarshal the json response into a Treaty.
@@ -186,12 +186,12 @@ func BuildMeasureSearchUrl(meeting Meeting_Date, cat Cat, topic Topic, docType D
 // Example usage:
 //
 //	url := BuildSearchMeetingDocuments(
-// 						MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting,
-// 						Meeting_Integer_ATCM_46_CEP_26_Kochi_2024,
-// 						Party_COMNAP,
-// 						PaperType_IP,
-// 						Category_Safety_and_Operations_in_Antarctica,
-// 						1,)
+//						MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting,
+//						Meeting_Integer_ATCM_46_CEP_26_Kochi_2024,
+//						Party_COMNAP,
+//						PaperType_IP,
+//						Category_Safety_and_Operations_in_Antarctica,
+//						1,)
 //
 // Note: This function sets an empty value for the 'title' parameter in the URL.
 func BuildSearchMeetingDocuments(meetingType MeetingType, meeting Meeting_Integer, party Party, paperType PaperType, category Category, page int) string {
@@ -281,9 +281,9 @@ func AttachmentLink(attachment DocumentPayloadItemAttachmentsItem) DocumentLink 
 // ValidateDocumentLink checks if a given URL points to a valid document.
 //
 // This function performs the following checks:
-//   1. Sends a HEAD request to the URL.
-//   2. Verifies that the response status code is 200 (OK).
-//   3. Checks if the Content-Type of the response matches doc, docx, pdf, zip, png.
+//  1. Sends a HEAD request to the URL.
+//  2. Verifies that the response status code is 200 (OK).
+//  3. Checks if the Content-Type of the response matches doc, docx, pdf, zip, png.
 //
 // Parameters:
 //   - url: The URL string to validate.
