@@ -8,8 +8,22 @@ import (
 	"os"
 	"strings"
 
+	"github.com/parquet-go/parquet-go"
+
 	"github.com/carlohamalainen/antarctic-database-go"
 )
+
+type RowTypeV1 struct {
+	MeetingName string
+	Number      int
+	Revision    int
+	Name        string
+	MeetingCity string
+	MeetingID   int
+	MeetingYear int
+	Agendas     []string
+	Parties     []string
+}
 
 func main() {
 	meetingType := ats.MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting
@@ -24,6 +38,8 @@ func main() {
 
 	rows := [][]string{}
 	rows = append(rows, header)
+
+	prows := []RowTypeV1{}
 
 	for page > 0 {
 		url := ats.BuildSearchMeetingDocuments(meetingType, meeting, party, paperType, category, page)
@@ -62,6 +78,20 @@ func main() {
 			row = append(row, strings.Join(partyNames, " | "))
 
 			rows = append(rows, row)
+
+			prow := RowTypeV1{
+				MeetingName: item.Meeting_name,
+				Number:      item.Number,
+				Revision:    item.Revision,
+				Name:        item.Name,
+				MeetingCity: item.Meeting_city,
+				MeetingID:   item.Meeting_id,
+				MeetingYear: item.Meeting_year,
+				Agendas:     agendaNumbers,
+				Parties:     partyNames,
+			}
+
+			prows = append(prows, prow)
 		}
 
 		page = int(document.Pager.Next)
@@ -77,5 +107,19 @@ func main() {
 	writer.Flush()
 	if err := writer.Error(); err != nil {
 		panic(err)
+	}
+
+	pfile, perr := os.Create("meetings.parquet")
+	if perr != nil {
+		panic(perr)
+	}
+	defer pfile.Close()
+
+	pwriter := parquet.NewGenericWriter[RowTypeV1](pfile)
+	defer pwriter.Close()
+
+	_, werr := pwriter.Write(prows)
+	if werr != nil {
+		panic(werr)
 	}
 }

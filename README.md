@@ -143,7 +143,50 @@ type DocumentPayloadItem struct {
 
 [example/downloads](./example/downloads/): search and validate meeting documents
 
-[example/csv](./example/csv/): search meeting documents and produce simple CSV output.
+[example/csv](./example/csv/): search meeting documents and produce simple CSV and Parquet output.
+
+Use [duckdb](duckdb) to have a quick look at the Parquet output:
+
+```
+D FROM 'meetings.parquet';
+┌─────────────┬────────┬──────────┬──────────────────────┬─────────────┬───────────┬─────────────┬────────────────────┬──────────────────────┐
+│ MeetingName │ Number │ Revision │         Name         │ MeetingCity │ MeetingID │ MeetingYear │      Agendas       │       Parties        │
+│   varchar   │ int64  │  int64   │       varchar        │   varchar   │   int64   │    int64    │     varchar[]      │      varchar[]       │
+├─────────────┼────────┼──────────┼──────────────────────┼─────────────┼───────────┼─────────────┼────────────────────┼──────────────────────┤
+│ ATCM XII    │      1 │        1 │ Agreed measures fo…  │ Canberra    │        24 │        1983 │ [ATCM 6]           │ [United Kingdom]     │
+│ ATCM XII    │      2 │        0 │ Agenda               │ Canberra    │        24 │        1983 │ [ATCM 4]           │ [Australia]          │
+│ ATCM XII    │      3 │        0 │ Improvement of tel…  │ Canberra    │        24 │        1983 │ [ATCM 5]           │ [United Kingdom]     │
+│ ATCM XII    │      4 │        1 │ Non-governmental e…  │ Canberra    │        24 │        1983 │ [ATCM 8]           │ [United Kingdom]     │
+│ ATCM XII    │      5 │        0 │ Telecommunications…  │ Canberra    │        24 │        1983 │ [ATCM 5]           │ [Australia]          │
+│ ATCM XII    │      6 │        0 │ Discussion paper o…  │ Canberra    │        24 │        1983 │ [ATCM 6]           │ [Australia]          │
+│ ATCM XII    │      7 │        0 │ Draft recommendati…  │ Canberra    │        24 │        1983 │ [ATCM 6]           │ [Australia]          │
+│ ATCM XII    │      8 │        0 │ Operation of the A…  │ Canberra    │        24 │        1983 │ [ATCM 10]          │ [Chile]              │
+│ ATCM XII    │      9 │        0 │ Working document o…  │ Canberra    │        24 │        1983 │ [ATCM 6]           │ [Argentina, Chile]   │
+│ ATCM XII    │     10 │        0 │ Public availabilit…  │ Canberra    │        24 │        1983 │ [ATCM 11]          │ [United Kingdom]     │
+│ ATCM XII    │     11 │        0 │ Discussion paper o…  │ Canberra    │        24 │        1983 │ [ATCM 12]          │ [United Kingdom]     │
+│ ATCM XII    │     12 │        0 │ Note on Exchange o…  │ Canberra    │        24 │        1983 │ [ATCM 13]          │ [United Kingdom]     │
+│ ATCM XII    │     13 │        0 │ Exchanges of infor…  │ Canberra    │        24 │        1983 │ [ATCM 13]          │ [United Kingdom]     │
+│ ATCM XII    │     14 │        1 │ Draft recommendati…  │ Canberra    │        24 │        1983 │ [ATCM 7]           │ [Argentina, Chile,…  │
+│ ATCM XII    │     15 │        0 │ Improvement of tel…  │ Canberra    │        24 │        1983 │ [ATCM 5]           │ [Argentina, Brazil…  │
+│ ATCM XII    │     16 │        1 │ Draft recommendati…  │ Canberra    │        24 │        1983 │ [ATCM 17]          │ [India]              │
+│ ATCM XII    │     17 │        1 │ Extension of the e…  │ Canberra    │        24 │        1983 │ [ATCM 7]           │ [United States]      │
+│ ATCM XII    │     18 │        0 │ Draft recommendati…  │ Canberra    │        24 │        1983 │ [ATCM 6]           │ [Australia]          │
+│ ATCM XII    │     19 │        0 │ Item relating to t…  │ Canberra    │        24 │        1983 │ [ATCM 9]           │ [Argentina]          │
+│ ATCM XII    │     20 │        0 │ Item relating to g…  │ Canberra    │        24 │        1983 │ [ATCM 9]           │ [Argentina]          │
+│ ATCM XII    │     21 │        0 │ Draft recommendati…  │ Canberra    │        24 │        1983 │ [ATCM 12]          │ [United Kingdom]     │
+│ ATCM XII    │     22 │        0 │ Draft recommendati…  │ Canberra    │        24 │        1983 │ [ATCM 5]           │ [Australia]          │
+│ ATCM XII    │     23 │        0 │ Draft recommendati…  │ Canberra    │        24 │        1983 │ [ATCM 5]           │ [Australia]          │
+│ ATCM XII    │     24 │        1 │ Final report of th…  │ Canberra    │        24 │        1983 │ [ATCM 18]          │ [Australia]          │
+│ ATCM XII    │     24 │        2 │ Final report of th…  │ Canberra    │        24 │        1983 │ [ATCM 18]          │ [Australia]          │
+│ ATCM XII    │     25 │        0 │ Draft recommendati…  │ Canberra    │        24 │        1983 │ [ATCM 6]           │ [Australia]          │
+│ ATCM XII    │     26 │        0 │ Recommendation on …  │ Canberra    │        24 │        1983 │ [ATCM 10, ATCM 11] │ [Australia]          │
+│ ATCM XII    │     27 │        1 │ Message from the T…  │ Canberra    │        24 │        1983 │ [ATCM 17]          │ [Australia]          │
+│ ATCM XII    │     28 │        1 │ SCAR assistance to…  │ Canberra    │        24 │        1983 │ [ATCM 10]          │ [Australia]          │
+├─────────────┴────────┴──────────┴──────────────────────┴─────────────┴───────────┴─────────────┴────────────────────┴──────────────────────┤
+│ 29 rows                                                                                                                          9 columns │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
 
 ## Related Projects
 
@@ -174,6 +217,7 @@ The [BSD 3-Clause license][bsd], the same as the [Go language][golic].
 [atsdb]: https://www.ats.aq/e/tools-and-resources.html
 [bsd]: https://opensource.org/licenses/BSD-3-Clause
 [doc]: https://pkg.go.dev/github.com/carlohamalainen/antarctic-database-go
+[duckdb]: https://duckdb.org
 [golic]: https://go.dev/LICENSE
 [treatydb]: https://www.ats.aq/devAS/ToolsAndResources/AntarcticTreatyDatabase?lang=e
 [meetingdb]: https://www.ats.aq/devAS/Meetings/DocDatabase?lang=e
