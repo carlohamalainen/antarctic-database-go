@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/PuerkitoBio/goquery v1.10.0
 	github.com/parquet-go/parquet-go v0.23.0
-	golang.org/x/text v0.18.0
+	golang.org/x/text v0.19.0
 )
 
 require (
