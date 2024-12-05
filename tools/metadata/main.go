@@ -369,7 +369,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	file := &ast.File{
-		Name: ast.NewIdent("api"),
+		Name: ast.NewIdent("ats"),
 	}
 
 	parseTarget(file, SearchDatabaseScrapeTarget)
