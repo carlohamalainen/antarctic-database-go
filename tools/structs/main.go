@@ -114,7 +114,7 @@ func generateGoCode(structs []structInfo) ([]byte, error) {
 	}
 
 	f := &ast.File{
-		Name:  &ast.Ident{Name: "api"},
+		Name:  &ast.Ident{Name: "ats"},
 		Decls: decls,
 	}
 
