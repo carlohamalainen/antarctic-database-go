@@ -24,3 +24,8 @@ go.work.sum
 # env file
 .env
 meetings.parquet
+
+# binaries
+prepare-document-pipeline
+run-fulltext
+run-ocr

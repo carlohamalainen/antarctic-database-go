@@ -13,6 +13,8 @@ func TestFirst(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
+	client := &http.Client{} // no caching!
+	
 	meetingType := MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting
 	meeting := Meeting_Integer_ATCM_46_CEP_26_Kochi_2024
 	party := Party_All
@@ -49,7 +51,7 @@ func TestFirst(t *testing.T) {
 			for _, downloadURL := range downloadURLs {
 				logger.Info("validating document link", "url", downloadURL.Url)
 
-				valid, err := ValidateDocumentLink(downloadURL.Url)
+				valid, err := ValidateDocumentLink(client, downloadURL.Url)
 				if err != nil {
 					t.Fatalf("failed to validate %s due to: %s", downloadURL, err)
 				}
@@ -63,7 +65,7 @@ func TestFirst(t *testing.T) {
 					attachmentURL := AttachmentLink(attachment)
 
 					logger.Info("validating attachment link", "url", attachmentURL.Url)
-					valid, err := ValidateDocumentLink(attachmentURL.Url)
+					valid, err := ValidateDocumentLink(client, attachmentURL.Url)
 					if err != nil {
 						t.Fatalf("failed to validate %s due to: %s", attachmentURL, err)
 					}
