@@ -52,7 +52,7 @@ const (
 	Meeting_Date_ATCM_XX_Utrecht_1996                     Meeting_Date = "05/10/1996"
 	Meeting_Date_ATCM_X_Washington_1979                   Meeting_Date = "10/05/1979"
 	Meeting_Date_ATIP_20192021_Intersessional_period_2021 Meeting_Date = "06/07/2021"
-	Meeting_Date_All                                      Meeting_Date = "1/1/1958"
+	Meeting_Date_All                                      Meeting_Date = "01/01/1958"
 	Meeting_Date_Antarctic_Conference_Washington_1959     Meeting_Date = "12/01/1959"
 	Meeting_Date_Conf_CCAMLR_Canberra_1980                Meeting_Date = "05/20/1980"
 	Meeting_Date_Conf_CCAS_London_1972                    Meeting_Date = "02/11/1972"
