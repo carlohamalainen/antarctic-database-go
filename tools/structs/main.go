@@ -39,13 +39,13 @@ var caser = cases.Title(language.Und)
 func generateGoStructs(data interface{}, name string) []structInfo {
 	var structs []structInfo
 	fields := []*dst.Field{}
-
+	
 	switch v := data.(type) {
 	case map[string]interface{}:
 		for key, value := range v {
 			fieldName := caser.String(key)
 			var fieldType dst.Expr
-
+			
 			switch typedValue := value.(type) {
 			case string:
 				fieldType = &dst.Ident{Name: "string"}
@@ -62,17 +62,21 @@ func generateGoStructs(data interface{}, name string) []structInfo {
 				nestedStructs := generateGoStructs(typedValue, nestedStructName)
 				structs = append(structs, nestedStructs...)
 			case []interface{}:
+				// If we have a nonempty list of things we can try to determine their types - loop through all the values.
 				if len(typedValue) > 0 {
-					sliceType := reflect.TypeOf(typedValue[0])
-					if sliceType == reflect.TypeOf(map[string]interface{}{}) {
-						nestedStructName := name + fieldName + "Item"
-						fieldType = &dst.ArrayType{Elt: &dst.Ident{Name: nestedStructName}}
-						nestedStructs := generateGoStructs(typedValue[0], nestedStructName)
-						structs = append(structs, nestedStructs...)
-					} else {
-						fieldType = &dst.ArrayType{Elt: &dst.Ident{Name: sliceType.String()}}
+					for idxTypedValue := range len(typedValue) {
+						sliceType := reflect.TypeOf(typedValue[idxTypedValue])
+						if sliceType == reflect.TypeOf(map[string]interface{}{}) {
+							nestedStructName := name + fieldName + "Item"
+							fieldType = &dst.ArrayType{Elt: &dst.Ident{Name: nestedStructName}}
+							nestedStructs := generateGoStructs(typedValue[idxTypedValue], nestedStructName)
+							structs = append(structs, nestedStructs...)
+						} else {
+							fieldType = &dst.ArrayType{Elt: &dst.Ident{Name: sliceType.String()}}
+						}
 					}
 				} else {
+					// Otherwise just note this as an array of unknown.
 					fieldType = &dst.ArrayType{Elt: &dst.Ident{Name: "interface{}"}}
 				}
 			default:
@@ -85,6 +89,8 @@ func generateGoStructs(data interface{}, name string) []structInfo {
 				Tag:   &dst.BasicLit{Kind: token.STRING, Value: fmt.Sprintf("`json:\"%s\"`", key)},
 			})
 		}
+	default:
+		panic(fmt.Errorf("What happened, what is this type? %+v", data))
 	}
 
 	structs = append(structs, structInfo{name: name, fields: fields})
