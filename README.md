@@ -283,10 +283,10 @@ There are a number of ways you can support the project:
 
 ## License
 
-The [BSD 3-Clause license][bsd], the same as the [Go language][golic].
+The [MIT license][mit].
 
 [atsdb]: https://www.ats.aq/e/tools-and-resources.html
-[bsd]: https://opensource.org/licenses/BSD-3-Clause
+[mit]: https://opensource.org/licenses/MIT
 [doc]: https://pkg.go.dev/github.com/carlohamalainen/antarctic-database-go
 [duckdb]: https://duckdb.org
 [golic]: https://go.dev/LICENSE
