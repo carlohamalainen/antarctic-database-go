@@ -4,8 +4,8 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/carlohamalainen/antarctic-database-go.svg)](https://pkg.go.dev/github.com/carlohamalainen/antarctic-database-go)
 [![Sourcegraph Badge](https://sourcegraph.com/github.com/carlohamalainen/antarctic-database-go/-/badge.svg)](https://sourcegraph.com/github.com/carlohamalainen/antarctic-database-go?badge)
 
-antarctic-database-go provides a simple API for querying documents and measures in the [ATS Database][atsdb].
-Specifically, we support the _Antarctic Treaty Database_ and _Meeting Documents_ databases.
+antarctic-database-go provides a comprehensive API and processing pipeline for querying and extracting text from documents and measures in the [ATS Database][atsdb].
+Specifically, we support the _Antarctic Treaty Database_ and _Meeting Documents_ databases, including a full OCR pipeline for processing scanned documents.
 
 [Antarctic Treaty Database search page][treatydb] description:
 
@@ -22,6 +22,8 @@ Specifically, we support the _Antarctic Treaty Database_ and _Meeting Documents_
 * [Installation](#installation)
 * [Changelog](#changelog)
 * [API](#api)
+* [OCR Pipeline](#ocr-pipeline)
+* [Data Directory](#data-directory)
 * [Examples](#examples)
 * [Related Projects](#related-projects)
 * [TODO](#TODO)
@@ -41,6 +43,7 @@ Starting with `v1.0.0` of antarctic-database-go, Go 1.23+ is required.
 
 ## Changelog
 
+*    **2025-01-20 (v2.0.0)** : Major update - Added OCR pipeline for processing scanned documents.
 *    **2024-09-09 (v1.0.3)** : Tag version 1.0.3.
 *    **2024-09-10** : Documentation, tidyup.
 *    **2024-09-09 (v1.0.2)** : Tag version 1.0.2.
@@ -90,6 +93,70 @@ func Meeting_DateToString(m Meeting_Date) string {
 		return "Meeting_Date_ATCM_III_Brussels_1964"
   // many more lines
 ```
+
+## OCR Pipeline
+
+The project now includes a comprehensive OCR pipeline for processing scanned Antarctic Treaty documents. This pipeline can automatically detect scanned PDFs, extract individual pages, and perform OCR using multiple providers.
+
+### Pipeline Components
+
+1. **Document Pipeline** (`cmd/prepare-document-pipeline/`): Downloads documents and prepares them for processing
+   - Detects scanned vs text-based PDFs using PyMuPDF microservice
+   - Extracts individual pages from scanned PDFs
+   - Stores documents and processing status in SQLite database
+
+2. **OCR Processing** (`cmd/run-ocr/`): Performs OCR on scanned document pages
+   - Supports multiple OCR providers:
+     - NVIDIA API with Llama models
+     - Anthropic API with Claude models
+   - Automatic image optimization (DPI reduction) for API limits
+   - Rate limiting and retry logic
+
+3. **Full Text Extraction** (`cmd/run-fulltext/`): Extracts text from non-scanned documents
+   - Uses PyMuPDF for text extraction
+   - Falls back to LibreOffice for document conversion
+
+4. **PyMuPDF Microservice** (`pymupdf-microservice/`): Flask-based service for PDF analysis
+   - Detects scanned pages (full-page images)
+   - Extracts text from PDFs
+   - Provides REST API endpoints
+
+### Database Schema
+
+The OCR pipeline uses SQLite with the following main tables:
+- `documents`: Original documents with status tracking
+- `pages`: Individual pages extracted from scanned PDFs
+- `ocr`: OCR results with method and timestamp
+- `full_text`: Full text extraction results
+
+### Running the Pipeline
+
+Convenient scripts are provided in the `scripts/` directory:
+
+```bash
+# 1. Prepare document pipeline - download and analyze documents
+$ ./scripts/prepare_document_pipeline.sh
+
+# 2. Run OCR on scanned documents (uses NVIDIA by default)
+$ ./scripts/run_ocr.sh
+
+# 3. Extract full text from non-scanned documents
+$ ./scripts/run_fulltext.sh
+
+# 4. Extract and organize processed documents into a dataset
+$ ./scripts/run_extract.sh
+```
+
+## Data Directory
+
+The `data/` directory contains:
+
+- **external/**: External data sources
+  - `utas/`: University of Tasmania Antarctic Treaty documents (PDFs)
+- **processed/**: Processed datasets with extracted text
+- **raw/**: Raw data files including `wps_missing.csv`
+
+Processed datasets are timestamped and include both PDFs and extracted text files organized by meeting and document type.
 
 [structs.go](./structs.go) has auto-generated structures for json responses. For example, meeting document responses can be unmarshalled
 to a `Document` which has a pager and a payload. Pages start at `1` and a `DocumentPager.Next` of 0 indicates the final page.
@@ -144,6 +211,12 @@ type DocumentPayloadItem struct {
 [example/downloads](./example/downloads/): search and validate meeting documents
 
 [example/csv](./example/csv/): search meeting documents and produce simple CSV and Parquet output.
+
+[cmd/extract-documents](./cmd/extract-documents/): extract documents with various filtering options.
+
+[cmd/information-exchange](./cmd/information-exchange/): process information exchange reports.
+
+[scripts/run_information-exchange.sh](./scripts/run_information-exchange.sh): convenient script to run information exchange processing.
 
 Use [duckdb](duckdb) to have a quick look at the Parquet output:
 
