@@ -1,0 +1,57 @@
+name: OCR Library Local Tests
+
+# This workflow is for local testing only
+# Not triggered by GitHub events
+on:
+  workflow_dispatch:
+    inputs:
+      skip_ocr:
+        description: 'Skip actual OCR tests (uses NVIDIA API)'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  test-local:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: go.mod
+        cache: true
+
+    - name: Install dependencies
+      run: |
+        echo "Installing poppler-utils for PDF processing..."
+        sudo apt-get update
+        sudo apt-get install -y poppler-utils
+        # Verify pdftoppm is installed and working
+        if ! pdftoppm -v; then
+          echo "pdftoppm is required but not working properly"
+          exit 1
+        fi
+
+    - name: Test PDF to PNG conversion
+      run: go test -v ./ocr -run TestConvertPDFToPNG
+
+    - name: Run OCR tests
+      if: "${{ inputs.skip_ocr == false }}"
+      run: go test -v ./ocr -run TestNvidiaOCR
+      env:
+        NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+
+    - name: Skip OCR tests (if requested)
+      if: "${{ inputs.skip_ocr == true }}"
+      run: echo "Skipping OCR tests as requested"
+
+    # Upload test artifacts if any test fails
+    - name: Archive test artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-output-local
+        path: test-data/output_*
+        retention-days: 1
