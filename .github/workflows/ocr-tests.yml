@@ -1,0 +1,52 @@
+name: OCR Library Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        # Ensure we fetch the test data files
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: go.mod
+        cache: true
+
+    - name: Install dependencies
+      run: |
+        echo "Installing poppler-utils for PDF processing..."
+        sudo apt-get update
+        sudo apt-get install -y poppler-utils
+        # Verify pdftoppm is installed and working
+        if ! pdftoppm -v; then
+          echo "pdftoppm is required but not working properly"
+          exit 1
+        fi
+
+    - name: Test PDF to PNG conversion
+      run: go test -v ./nvidia -run TestConvertPDFToPNG
+
+    - name: Run OCR tests with API
+      run: go test -v ./nvidia -run TestNvidiaOCR
+      env:
+        NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+
+    # Upload test artifacts if any test fails
+    - name: Archive test artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-output
+        path: test-data/output_*
+        retention-days: 7

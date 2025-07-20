@@ -6,9 +6,15 @@ import (
 	"net/http"
 
 	"github.com/carlohamalainen/antarctic-database-go"
+	"github.com/carlohamalainen/antarctic-database-go/cache"
 )
 
 func main() {
+	client, err := cache.NewHTTPClient(nil)
+	if err != nil {
+		panic(err)
+	}
+
 	meetingType := ats.MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting
 	meeting := ats.Meeting_Integer_ATCM_46_CEP_26_Kochi_2024
 	party := ats.Party_COMNAP
@@ -41,7 +47,7 @@ func main() {
 			downloadURLs := ats.DownloadLinks(item)
 
 			for _, downloadURL := range downloadURLs {
-				valid, err := ats.ValidateDocumentLink(downloadURL.Url)
+				valid, err := ats.ValidateDocumentLink(client, downloadURL.Url)
 				if err != nil {
 					panic(err)
 				}
@@ -56,7 +62,7 @@ func main() {
 			for _, attachment := range item.Attachments {
 				attachmentURL := ats.AttachmentLink(attachment)
 
-				valid, err := ats.ValidateDocumentLink(attachmentURL.Url)
+				valid, err := ats.ValidateDocumentLink(client, attachmentURL.Url)
 				if err != nil {
 					panic(err)
 				}

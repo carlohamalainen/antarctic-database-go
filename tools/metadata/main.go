@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log/slog"
 	"maps"
@@ -12,26 +13,30 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 
+	"github.com/carlohamalainen/antarctic-database-go/cache"
+
 	"unicode"
 
-	"go/ast"
-	"go/format"
 	"go/token"
+
+	"github.com/dave/dst"
+	"github.com/dave/dst/decorator"
+	"github.com/dave/dst/dstutil"
 )
 
-func generateCases(stuff map[string]string) []ast.Stmt {
+func generateCases(stuff map[string]string) []dst.Stmt {
 	keys := slices.Collect(maps.Keys(stuff))
 	slices.Sort(keys)
 
-	cases := make([]ast.Stmt, 0, len(stuff)+1)
+	cases := make([]dst.Stmt, 0, len(stuff)+1)
 
 	for _, name := range keys {
-		cases = append(cases, &ast.CaseClause{
-			List: []ast.Expr{ast.NewIdent(name)},
-			Body: []ast.Stmt{
-				&ast.ReturnStmt{
-					Results: []ast.Expr{
-						&ast.BasicLit{
+		cases = append(cases, &dst.CaseClause{
+			List: []dst.Expr{dst.NewIdent(name)},
+			Body: []dst.Stmt{
+				&dst.ReturnStmt{
+					Results: []dst.Expr{
+						&dst.BasicLit{
 							Kind:  token.STRING,
 							Value: fmt.Sprintf(`"%s"`, name),
 						},
@@ -42,11 +47,11 @@ func generateCases(stuff map[string]string) []ast.Stmt {
 	}
 
 	panicInternalError :=
-		&ast.ExprStmt{
-			X: &ast.CallExpr{
-				Fun: ast.NewIdent("panic"),
-				Args: []ast.Expr{
-					&ast.BasicLit{
+		&dst.ExprStmt{
+			X: &dst.CallExpr{
+				Fun: dst.NewIdent("panic"),
+				Args: []dst.Expr{
+					&dst.BasicLit{
 						Kind:  token.STRING,
 						Value: `"internal error"`,
 					},
@@ -54,77 +59,85 @@ func generateCases(stuff map[string]string) []ast.Stmt {
 			},
 		}
 
-	cases = append(cases, &ast.CaseClause{
+	cases = append(cases, &dst.CaseClause{
 		List: nil, // default case
-		Body: []ast.Stmt{panicInternalError},
+		Body: []dst.Stmt{panicInternalError},
 	})
 	return cases
 }
 
-func mkDeclarations(prefix string, stuff map[string]string) []ast.Decl {
-	decls := []ast.Decl{}
+func mkDeclarations(prefix string, stuff map[string]string) []dst.Decl {
+	decls := []dst.Decl{}
 
-	decls = append(decls, &ast.GenDecl{
+	decls = append(decls, &dst.GenDecl{
 		Tok: token.TYPE,
-		Specs: []ast.Spec{
-			&ast.TypeSpec{
-				Name: ast.NewIdent(prefix),
-				Type: ast.NewIdent("string"),
+		Specs: []dst.Spec{
+			&dst.TypeSpec{
+				Name: dst.NewIdent(prefix),
+				Type: dst.NewIdent("string"),
 			},
 		},
+		// Decs: dst.GenDeclDecorations{
+		//     NodeDecs: dst.NodeDecs{
+		//         Before: dst.NewLine,
+		//         Start: []string{"// Blah is a type alias for string"},
+		//     },
+		// },
 	})
-
-	constDecl := &ast.GenDecl{
-		Tok: token.CONST,
-	}
 
 	keys := slices.Collect(maps.Keys(stuff))
 	slices.Sort(keys)
+
+	constDecl := &dst.GenDecl{
+		Tok: token.CONST,
+	}
 
 	for _, name := range keys {
 		value := stuff[name]
 
 		slog.Info("generating const", "type", prefix, "name", name, "value", value)
 
-		constDecl.Specs = append(constDecl.Specs, &ast.ValueSpec{
-			Names: []*ast.Ident{ast.NewIdent(name)},
-			Type:  ast.NewIdent(prefix),
-			Values: []ast.Expr{
-				&ast.BasicLit{
+		s := &dst.ValueSpec{
+			Names: []*dst.Ident{dst.NewIdent(name)},
+			Type:  dst.NewIdent(prefix),
+			Values: []dst.Expr{
+				&dst.BasicLit{
 					Kind:  token.STRING,
 					Value: fmt.Sprintf(`"%s"`, value),
 				},
 			},
-		})
+		}
+
+		constDecl.Specs = append(constDecl.Specs, s)
 	}
 
 	decls = append(decls, constDecl)
 
-	createKeysList := func(keys []string) []ast.Expr {
-		var keysList []ast.Expr
+	createKeysList := func(keys []string) []dst.Expr {
+		var keysList []dst.Expr
 		for _, key := range keys {
 			if strings.HasSuffix(key, "_All") {
 				continue
 			}
-			keysList = append(keysList, ast.NewIdent(key))
+			keysList = append(keysList, dst.NewIdent(key))
 		}
 		return keysList
 	}
 
 	// Generate const list of all keys
 	keysListName := prefix + "Keys"
-	keysListDecl := &ast.GenDecl{
+	keysListDecl := &dst.GenDecl{
 		Tok: token.VAR,
-		Specs: []ast.Spec{
-			&ast.ValueSpec{
-				Names: []*ast.Ident{ast.NewIdent(keysListName)},
-				Type: &ast.ArrayType{
-					Elt: ast.NewIdent(prefix),
+		Specs: []dst.Spec{
+			&dst.ValueSpec{
+				Names: []*dst.Ident{dst.NewIdent(keysListName)},
+				Type: &dst.ArrayType{
+					Elt: dst.NewIdent(prefix),
 				},
-				Values: []ast.Expr{
-					&ast.CompositeLit{
-						Type: &ast.ArrayType{
-							Elt: ast.NewIdent(prefix),
+				Values: []dst.Expr{
+					&dst.CompositeLit{
+						Type: &dst.ArrayType{
+							Elt: dst.NewIdent(prefix),
 						},
 						Elts: createKeysList(keys),
 					},
@@ -134,30 +147,30 @@ func mkDeclarations(prefix string, stuff map[string]string) []ast.Decl {
 	}
 	decls = append(decls, keysListDecl)
 
-	funcDecl := &ast.FuncDecl{
-		Name: ast.NewIdent(fmt.Sprintf("%sToString", prefix)),
-		Type: &ast.FuncType{
-			Params: &ast.FieldList{
-				List: []*ast.Field{
+	funcDecl := &dst.FuncDecl{
+		Name: dst.NewIdent(fmt.Sprintf("%sToString", prefix)),
+		Type: &dst.FuncType{
+			Params: &dst.FieldList{
+				List: []*dst.Field{
 					{
-						Names: []*ast.Ident{ast.NewIdent("m")},
-						Type:  ast.NewIdent(prefix),
+						Names: []*dst.Ident{dst.NewIdent("m")},
+						Type:  dst.NewIdent(prefix),
 					},
 				},
 			},
-			Results: &ast.FieldList{
-				List: []*ast.Field{
+			Results: &dst.FieldList{
+				List: []*dst.Field{
 					{
-						Type: ast.NewIdent("string"),
+						Type: dst.NewIdent("string"),
 					},
 				},
 			},
 		},
-		Body: &ast.BlockStmt{
-			List: []ast.Stmt{
-				&ast.SwitchStmt{
-					Tag: ast.NewIdent("m"),
-					Body: &ast.BlockStmt{
+		Body: &dst.BlockStmt{
+			List: []dst.Stmt{
+				&dst.SwitchStmt{
+					Tag: dst.NewIdent("m"),
+					Body: &dst.BlockStmt{
 						List: generateCases(stuff),
 					},
 				},
@@ -171,7 +184,7 @@ func mkDeclarations(prefix string, stuff map[string]string) []ast.Decl {
 
 }
 
-func parseStructures(doc *goquery.Document, prefix, id string) []ast.Decl {
+func parseStructures(doc *goquery.Document, prefix, id string) []dst.Decl {
 	stuff := map[string]string{}
 	reverse := map[string]string{}
 
@@ -211,19 +224,25 @@ func parseStructures(doc *goquery.Document, prefix, id string) []ast.Decl {
 	if len(stuff) == 0 {
 		panic("did not find any declarations for " + prefix + " " + id)
 	}
+
 	return mkDeclarations(prefix, stuff)
 }
 
-func parseRadioBoxes(file *ast.File, url string) {
-	resp, err := http.Get(url)
+func parseRadioBoxes(file *dst.File, url string) error {
+	client, err := cache.NewHTTPClient(nil)
 	if err != nil {
-		panic(err)
+		return err
+	}
+
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
 	}
 	defer resp.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// Top level radio boxes:
@@ -258,6 +277,8 @@ func parseRadioBoxes(file *ast.File, url string) {
 	})
 
 	file.Decls = append(file.Decls, mkDeclarations(meetingPrefix, radioBoxes)...)
+
+	return nil
 }
 
 type ScrapeTarget struct {
@@ -320,10 +341,17 @@ var (
 	}
 )
 
-func parseTarget(file *ast.File, target ScrapeTarget) {
+func parseTarget(file *dst.File, target ScrapeTarget) {
 	slog.Info("downloading", "url", target.Url)
 
-	resp, err := http.Get(target.Url)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	client := &http.Client{Transport: tr}
+
+	resp, err := client.Get(target.Url)
 	if err != nil {
 		panic(err)
 	}
@@ -368,24 +396,28 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
-	file := &ast.File{
-		Name: ast.NewIdent("ats"),
+	fileD := &dst.File{
+		Name: dst.NewIdent("ats"),
+		Decs: dst.FileDecorations{
+			NodeDecs: dst.NodeDecs{
+				Start: []string{"// AUTOGENERATED FILE! Do not edit!", "\n"},
+			},
+		},
 	}
 
-	parseTarget(file, SearchDatabaseScrapeTarget)
-	parseTarget(file, MeetingsDocDatabaseScrapeTarget)
-	parseRadioBoxes(file, MeetingsDocDatabaseScrapeTarget.Url)
+	parseTarget(fileD, SearchDatabaseScrapeTarget)
+	parseTarget(fileD, MeetingsDocDatabaseScrapeTarget)
+	parseRadioBoxes(fileD, MeetingsDocDatabaseScrapeTarget.Url)
 
-	fset := token.NewFileSet()
-	var buf strings.Builder
-	if _, err := buf.WriteString("// AUTOGENERATED FILE! Do not edit!\n\n"); err != nil {
+	dstutil.Apply(fileD, nil, nil)
+
+	fff, err := os.Create("metadata.go")
+	if err != nil {
 		panic(err)
 	}
-	if err := format.Node(&buf, fset, file); err != nil {
-		panic(err)
-	}
+	defer fff.Close()
 
-	if err := os.WriteFile("metadata.go", []byte(buf.String()), 0644); err != nil {
+	if err := decorator.Fprint(fff, fileD); err != nil {
 		panic(err)
 	}
 }
