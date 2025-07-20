@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/carlohamalainen/antarctic-database-go"
+	"github.com/carlohamalainen/antarctic-database-go/cache"
 )
 
 func main() {
@@ -14,6 +15,11 @@ func main() {
 	// then
 	//
 	// https://www.ats.aq/devAS/Meetings/Measure/813?s=1&iframe=1&from=05/30/2024&to=05/30/2024&cat=1&top=163&type=2&stat=3&txt=&curr=0
+
+	client, err := cache.NewHTTPClient(nil)
+	if err != nil {
+		panic(err)
+	}
 
 	meeting := ats.Meeting_Date_ATCM_46_CEP_26_Kochi_2024
 	cat := ats.Cat_Area_protection_and_management
@@ -65,7 +71,7 @@ func main() {
 		panic(fmt.Sprintf("bad response code %d on %s", resp.StatusCode, url2))
 	}
 
-	measure := ats.ParseMeasure(url2, resp.Body)
+	measure := ats.ParseMeasure(client, url2, resp.Body)
 
 	fmt.Printf("%+v\n", measure)
 }

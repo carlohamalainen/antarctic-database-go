@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -24,6 +23,21 @@ const (
 	French  Language = "f"
 	Russian Language = "r"
 )
+
+func (language Language) String() string {
+	switch language {
+	case English:
+		return "English"
+	case Spanish:
+		return "Spanish"
+	case French:
+		return "French"
+	case Russian:
+		return "Russian"
+	default:
+		panic("internal error")
+	}
+}
 
 type DocumentLink struct {
 	Language Language
@@ -53,7 +67,7 @@ type Characteristic struct {
 	Url   *string
 }
 
-func ParseMeasure(url string, body io.ReadCloser) Measure {
+func ParseMeasure(client *http.Client, url string, body io.ReadCloser) Measure {
 	m := Measure{}
 
 	doc, err := goquery.NewDocumentFromReader(body)
@@ -81,7 +95,7 @@ func ParseMeasure(url string, body io.ReadCloser) Measure {
 		characteristic.Text = text
 
 		if link != "" {
-			ok, err := ValidateDocumentLink(link)
+			ok, err := ValidateDocumentLink(client, link)
 			if err != nil {
 				panic(err)
 			}
@@ -172,6 +186,8 @@ func BuildMeasureSearchUrl(meeting Meeting_Date, cat Cat, topic Topic, docType D
 }
 
 // BuildSearchMeetingDocuments constructs a URL for searching meeting documents in the Antarctic Treaty System database.
+//
+// Human search page: https://www.ats.aq/devAS/Meetings/DocDatabase?lang=e
 //
 // Parameters:
 //   - meetingType: The MeetingType to filter the search results.
@@ -297,11 +313,7 @@ func AttachmentLink(attachment DocumentPayloadItemAttachmentsItem) DocumentLink 
 // point to a document of the expected types.
 //
 // Note: This function uses a timeout of 10 seconds for the HTTP request.
-func ValidateDocumentLink(url string) (bool, error) {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
+func ValidateDocumentLink(client *http.Client, url string) (bool, error) {
 	req, err := http.NewRequest("HEAD", url, nil)
 	if err != nil {
 		return false, fmt.Errorf("error creating request: %w", err)
@@ -321,10 +333,16 @@ func ValidateDocumentLink(url string) (bool, error) {
 	validTypes := []string{
 		"application/msword",
 		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+		"application/vnd.ms-excel",
 		"application/pdf",
 		"application/zip",
 		"application/x-zip-compressed",
+		"image/gif",
+		"image/jpeg",
 		"image/png",
+		"image/tiff",
 	}
 
 	for _, validType := range validTypes {
@@ -333,5 +351,6 @@ func ValidateDocumentLink(url string) (bool, error) {
 		}
 	}
 
-	return false, nil
+	// We shouldn't assume these are the only valid formats.
+	panic(fmt.Errorf("unknown content-type in response: %s", contentType))
 }
