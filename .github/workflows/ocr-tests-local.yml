@@ -50,7 +50,7 @@ jobs:
     # Upload test artifacts if any test fails
     - name: Archive test artifacts
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: test-output-local
         path: test-data/output_*
