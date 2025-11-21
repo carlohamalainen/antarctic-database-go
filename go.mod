@@ -3,7 +3,7 @@ module github.com/carlohamalainen/antarctic-database-go
 go 1.24.5
 
 require (
-	github.com/PuerkitoBio/goquery v1.10.3
+	github.com/PuerkitoBio/goquery v1.11.0
 	github.com/dave/dst v0.27.3
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
 	github.com/elazarl/goproxy v1.7.2
