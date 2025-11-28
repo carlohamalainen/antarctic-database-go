@@ -3,7 +3,9 @@
 set -e
 set -x
 
-cd $PROJECT_ROOT
+# Determine project root as: parent of the scripts directory
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 go build ./cmd/prepare-document-pipeline
 
