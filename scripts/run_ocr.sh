@@ -3,7 +3,9 @@
 set -e
 set -x
 
-cd $PROJECT_ROOT
+
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 go build ./cmd/run-ocr
 
