@@ -265,6 +265,9 @@ func TestHTTPClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed on first request: %v", err)
 	}
+	if resp1 == nil {
+		t.Fatalf("resp1 is nil")
+	}
 	defer resp1.Body.Close()
 
 	// Read response body
@@ -281,6 +284,9 @@ func TestHTTPClient(t *testing.T) {
 	resp2, err := client.Get(server.URL + "/test")
 	if err != nil {
 		t.Fatalf("Failed on second request: %v", err)
+	}
+	if resp2 == nil {
+		t.Fatalf("resp2 is nil")
 	}
 	defer resp2.Body.Close()
 

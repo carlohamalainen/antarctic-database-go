@@ -48,6 +48,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		if resp == nil {
+			panic("nil resp")
+		}
 		defer resp.Body.Close()
 
 		document := ats.Document{}

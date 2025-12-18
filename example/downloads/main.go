@@ -32,6 +32,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		if resp == nil {
+			panic("nil response when fetching url")
+		}
 		defer resp.Body.Close()
 
 		document := ats.Document{}

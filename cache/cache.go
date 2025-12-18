@@ -91,6 +91,10 @@ func (c *Cache) Get(url Url, method string) (*http.Response, error) {
 }
 
 func (c *Cache) Set(resp *http.Response, url string, method string) (*http.Response, error) {
+	if resp == nil {
+		return nil, fmt.Errorf("nil response passed to Set")
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

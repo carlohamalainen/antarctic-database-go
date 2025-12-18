@@ -233,10 +233,16 @@ func parseRadioBoxes(file *dst.File, url string) error {
 	if err != nil {
 		return err
 	}
+	if client == nil {
+		return fmt.Errorf("failed to create new http client")
+	}
 
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
+	}
+	if resp == nil {
+		return fmt.Errorf("nil response")
 	}
 	defer resp.Body.Close()
 
@@ -354,6 +360,9 @@ func parseTarget(file *dst.File, target ScrapeTarget) {
 	resp, err := client.Get(target.Url)
 	if err != nil {
 		panic(err)
+	}
+	if resp == nil {
+		panic("nil resp")
 	}
 	defer resp.Body.Close()
 

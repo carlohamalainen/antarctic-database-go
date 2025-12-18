@@ -42,6 +42,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	if resp == nil {
+		panic("failed to get url")
+	}
 	defer resp.Body.Close()
 
 	document := ats.Treaty{}
@@ -64,6 +67,9 @@ func main() {
 	resp, err = http.Get(url2)
 	if err != nil {
 		panic(err)
+	}
+	if resp == nil {
+		panic("nil resp")
 	}
 	defer resp.Body.Close()
 

@@ -39,13 +39,13 @@ var caser = cases.Title(language.Und)
 func generateGoStructs(data interface{}, name string) []structInfo {
 	var structs []structInfo
 	fields := []*dst.Field{}
-	
+
 	switch v := data.(type) {
 	case map[string]interface{}:
 		for key, value := range v {
 			fieldName := caser.String(key)
 			var fieldType dst.Expr
-			
+
 			switch typedValue := value.(type) {
 			case string:
 				fieldType = &dst.Ident{Name: "string"}
@@ -160,11 +160,17 @@ func download(ctx context.Context, url string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	if client == nil {
+		return nil, fmt.Errorf("failed to create new http client")
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
 		slog.Error("error making request", "error", err)
 		return nil, fmt.Errorf("error making the request: %w", err)
+	}
+	if resp == nil {
+		return nil, fmt.Errorf("nil response")
 	}
 	defer resp.Body.Close()
 

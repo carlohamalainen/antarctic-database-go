@@ -24,7 +24,9 @@ func TestRealGitHubAPIRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create HTTP client: %v", err)
 	}
-
+	if client == nil {
+		t.Fatalf("nil HTTP client")
+	}
 	// GitHub API endpoint that's stable and doesn't change often
 	url := "https://api.github.com/zen"
 
@@ -34,6 +36,9 @@ func TestRealGitHubAPIRequest(t *testing.T) {
 	duration1 := time.Since(startTime1)
 	if err != nil {
 		t.Fatalf("Failed on first request to GitHub API: %v", err)
+	}
+	if resp1 == nil {
+		t.Fatalf("nil resp1 for url %s", url)
 	}
 	defer resp1.Body.Close()
 
@@ -58,6 +63,9 @@ func TestRealGitHubAPIRequest(t *testing.T) {
 	duration2 := time.Since(startTime2)
 	if err != nil {
 		t.Fatalf("Failed on second request to GitHub API: %v", err)
+	}
+	if resp2 == nil {
+		t.Fatalf("nil resp2 for url %s", url)
 	}
 	defer resp2.Body.Close()
 
@@ -95,6 +103,10 @@ func TestRealGitHubAPIRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed on first JSON request: %v", err)
 	}
+	if respJSON1 == nil {
+		t.Fatalf("nil respJSON1")
+	}
+
 	defer respJSON1.Body.Close()
 
 	if respJSON1.StatusCode != http.StatusOK {

@@ -73,6 +73,14 @@ func main() {
 	slog.Info("starting")
 
 	client, err = cache.NewHTTPClient(dbFileArg)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	if client == nil {
+		slog.Error("nil client")
+		os.Exit(1)
+	}
 	cache_ := client.Transport.(*cache.Cache)
 	defer func() {
 		err := client.Transport.(*cache.Cache).SqliteCache.Close()
@@ -80,11 +88,6 @@ func main() {
 			logger.Error("failed to close sqlite", "error", err.Error())
 		}
 	}()
-
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
 
 	slog.Info("sanity checks")
 	err = ats.Sanity(*pipelineDbFileArg)

@@ -14,7 +14,7 @@ func TestFirst(t *testing.T) {
 	slog.SetDefault(logger)
 
 	client := &http.Client{} // no caching!
-	
+
 	meetingType := MeetingType_ATCM_Antarctic_Treaty_Consultative_Meeting
 	meeting := Meeting_Integer_ATCM_46_CEP_26_Kochi_2024
 	party := Party_All

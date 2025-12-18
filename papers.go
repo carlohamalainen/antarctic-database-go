@@ -39,18 +39,18 @@ type FullText struct {
 }
 
 type PaperRecord struct {
-	MeetingYear int `parquet:"meeting_year,required"`
-	MeetingType string `parquet:"meeting_type,required"`
-	MeetingNumber int `parquet:"meeting_number,required"`
-	MeetingName string `parquet:"meeting_name,required"`
-	Party       string `parquet:"party,required"`
-	Category    string `parquet:"category,required"`
-	PageUrl     string `parquet:"page_url,required"`
-	PageNr      int    `parquet:"page_nr,required"`
-	PayloadJson string `parquet:"payload_json,required"`
+	MeetingYear   int    `parquet:"meeting_year,required"`
+	MeetingType   string `parquet:"meeting_type,required"`
+	MeetingNumber int    `parquet:"meeting_number,required"`
+	MeetingName   string `parquet:"meeting_name,required"`
+	Party         string `parquet:"party,required"`
+	Category      string `parquet:"category,required"`
+	PageUrl       string `parquet:"page_url,required"`
+	PageNr        int    `parquet:"page_nr,required"`
+	PayloadJson   string `parquet:"payload_json,required"`
 
 	PaperId       int    `parquet:"paper_id,required"`
-	PaperType   string `parquet:"party_type,required"`
+	PaperType     string `parquet:"party_type,required"`
 	PaperName     string `parquet:"paper_name,required"`
 	PaperNumber   int    `parquet:"paper_number,required"`
 	PaperRevision int    `parquet:"paper_revision,required"`
@@ -58,8 +58,8 @@ type PaperRecord struct {
 	PaperUrl      string `parquet:"paper_url,required"`
 	PaperExists   bool   `parquet:"exists,required"`
 
-	Agendas            []string   `parquet:"agendas,optional"`
-	Parties            []string   `parquet:"parties,optional"`
+	Agendas []string `parquet:"agendas,optional"`
+	Parties []string `parquet:"parties,optional"`
 
 	AttachmentId       int    `parquet:"attachment_id,optional"`
 	AttachmentName     string `parquet:"attachment_name,optional"`
@@ -1025,10 +1025,10 @@ func collectDocuments(timeout time.Duration, client *http.Client, quick bool) ([
 							}
 
 							paperRecord := PaperRecord{
-								MeetingYear: item.Meeting_year,
-								MeetingType: item.Meeting_type,
+								MeetingYear:   item.Meeting_year,
+								MeetingType:   item.Meeting_type,
 								MeetingNumber: meetingNumber,
-								MeetingName: item.Meeting_name,
+								MeetingName:   item.Meeting_name,
 
 								Party:       PartyToString(party),
 								Category:    CategoryToStringShort(category),

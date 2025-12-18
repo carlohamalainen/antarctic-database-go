@@ -64,6 +64,10 @@ func GetUnprocessedDocuments(db *sql.DB, limit int) ([]Document, error) {
 func convertToText(client *http.Client, srcPath string) (string, error) {
 	apiURL := "http://localhost:11000/extract"
 
+	if client == nil {
+		return "", fmt.Errorf("client is nil")
+	}
+
 	reqBody, err := json.Marshal(map[string]string{"file_path": srcPath})
 	if err != nil {
 		return "", fmt.Errorf("error creating request: %w", err)
@@ -72,6 +76,9 @@ func convertToText(client *http.Client, srcPath string) (string, error) {
 	resp, err := client.Post(apiURL, "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return "", fmt.Errorf("error sending request: %w", err)
+	}
+	if resp == nil {
+		return "", fmt.Errorf("nil response")
 	}
 	defer resp.Body.Close()
 

@@ -41,6 +41,10 @@ func NewNvidiaClient(rpm int, apiKey string) *NvidiaClient {
 
 // Do performs an HTTP request with rate limiting
 func (c *NvidiaClient) Do(req *http.Request) (*http.Response, error) {
+	if c == nil {
+		return nil, fmt.Errorf("nil NvidiaClient passed to Do")
+	}
+
 	ctx := context.Background()
 	err := c.Limiter.Wait(ctx)
 	if err != nil {
@@ -93,6 +97,10 @@ type AssetResponse struct {
 
 // UploadImage uploads an image to NVIDIA's asset endpoint
 func UploadImage(client *NvidiaClient, imageData []byte, contentType, description string) (AssetResponse, error) {
+	if client == nil {
+		return AssetResponse{}, fmt.Errorf("nil NvidiaClient passed to UploadImage")
+	}
+
 	// Step 1: Request an Asset ID and Pre-signed Upload URL
 	assetURL := "https://api.nvcf.nvidia.com/v2/nvcf/assets"
 
@@ -119,6 +127,9 @@ func UploadImage(client *NvidiaClient, imageData []byte, contentType, descriptio
 	if err != nil {
 		return AssetResponse{}, fmt.Errorf("asset request failed: %w", err)
 	}
+	if resp == nil {
+		return AssetResponse{}, fmt.Errorf("nil response")
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -144,6 +155,9 @@ func UploadImage(client *NvidiaClient, imageData []byte, contentType, descriptio
 	if err != nil {
 		return AssetResponse{}, fmt.Errorf("upload request failed: %w", err)
 	}
+	if uploadResp == nil {
+		return AssetResponse{}, fmt.Errorf("upload response nil")
+	}
 	defer uploadResp.Body.Close()
 
 	if uploadResp.StatusCode != http.StatusOK {
@@ -164,6 +178,10 @@ func EncodeImageToBase64(imageData []byte) string {
 
 // RunNvidiaOCR performs OCR on an image using NVIDIA's API
 func RunNvidiaOCR(client *NvidiaClient, model string, asset AssetResponse, useAssetUpload bool, imageData []byte) (string, error) {
+	if client == nil {
+		return "", fmt.Errorf("nil NvidiaClient passed to RunNvidiaOCR")
+	}
+
 	invokeURL := "https://integrate.api.nvidia.com/v1/chat/completions"
 	stream := true
 
@@ -245,6 +263,9 @@ func RunNvidiaOCR(client *NvidiaClient, model string, asset AssetResponse, useAs
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
+	}
+	if resp == nil {
+		return "", fmt.Errorf("nil response")
 	}
 	defer resp.Body.Close()
 

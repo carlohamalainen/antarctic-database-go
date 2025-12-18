@@ -37,10 +37,18 @@ func NewAnthropicClient(rpm int, apiKey string) *AnthropicClient {
 }
 
 func (c *AnthropicClient) Do(req *http.Request) (*http.Response, error) {
+	if c == nil {
+		return nil, fmt.Errorf("nil AnthropicClient passed to Do")
+	}
+
 	ctx := context.Background()
 	err := c.Limiter.Wait(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("rate limiter error: %w", err)
+	}
+
+	if req == nil {
+		return nil, fmt.Errorf("nil req")
 	}
 
 	return c.Client.Do(req)
@@ -48,6 +56,10 @@ func (c *AnthropicClient) Do(req *http.Request) (*http.Response, error) {
 
 // anthropicOCR uses Anthropic's Claude API to perform OCR on an image converted from a PDF page
 func AnthropicOCR(client *AnthropicClient, model string, pdfBytes []byte) (string, error) {
+	if client == nil {
+		return "", fmt.Errorf("nil client passed to AnthropicOCR")
+	}
+
 	// Function to check if the image size will fit within Anthropic's limits after base64 encoding
 	checkSize := func(imgBytes []byte) (bool, float64, float64) {
 		rawSize := len(imgBytes)
@@ -181,6 +193,9 @@ func AnthropicOCR(client *AnthropicClient, model string, pdfBytes []byte) (strin
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("error making request: %w", err)
+	}
+	if resp == nil {
+		return "", fmt.Errorf("nil response")
 	}
 	defer resp.Body.Close()
 

@@ -304,6 +304,9 @@ func expandVisits(headers []string, s *goquery.Selection) ([]Visit, error) {
 		if !exists {
 			// If we have a previous header and values, print them
 			if currentHeader != nil {
+				if visit == nil {
+					panic(fmt.Errorf("trying to update nil valued visit"))
+				}
 				for z, cell := range currentHeader.Find("td").EachIter() {
 					if z < len(headers) {
 						visit.Header[headers[z]] = strings.TrimSpace(cell.Text())
@@ -519,6 +522,10 @@ func (s SelectionSlice) Less(i, j int) bool {
 }
 
 func ExpandChunks(url ats.URL, body string) ([]Chunk, error) {
+	if chunkdIDs == nil {
+		return nil, fmt.Errorf("global chunkIDs is nil")
+	}
+
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
 	if err != nil {
 		return nil, err
