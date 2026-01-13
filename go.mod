@@ -10,7 +10,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/parquet-go/parquet-go v0.26.3
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
-	golang.org/x/net v0.48.0
+	golang.org/x/net v0.49.0
 	golang.org/x/text v0.33.0
 	golang.org/x/time v0.14.0
 )
@@ -28,7 +28,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	golang.org/x/mod v0.31.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/tools v0.40.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 )
