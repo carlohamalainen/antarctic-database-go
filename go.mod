@@ -6,7 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.11.0
 	github.com/dave/dst v0.27.3
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
-	github.com/elazarl/goproxy v1.8.0
+	github.com/elazarl/goproxy v1.8.1
 	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/parquet-go/parquet-go v0.27.0
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
