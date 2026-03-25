@@ -29,4 +29,8 @@ meetings.parquet
 /prepare-document-pipeline
 /run-fulltext
 /run-ocr
+/information-exchange
+
+# 
+/data/processed/
 

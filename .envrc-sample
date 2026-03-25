@@ -1,2 +1,4 @@
+export PROJECT_ROOT="$(pwd)"
+
 export ANTHROPIC_API_KEY="xx-xxx-xxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxx"
 export NVIDIA_API_KEY="nvapi-xxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxx"

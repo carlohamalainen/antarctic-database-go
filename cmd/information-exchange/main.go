@@ -82,7 +82,7 @@ func ExpandReports(reportCollection ReportCollection) ([]Expanded, error) {
 					// 	continue
 					// }
 
-					document, _, _, err := ats.Download(url, timeout, client) // FIXME check 200
+					document, _, _, err := ats.DownloadWithRetry(string(url), timeout, client, 5, 2*time.Second)
 					if err != nil {
 						return nil, err
 					}
@@ -234,7 +234,7 @@ func DownloadSections(expanded []Expanded) error {
 
 				url := fmt.Sprintf("%s/%s", base, endpoint)
 
-				body, _, _, err := ats.Download(ats.URL(url), timeout, client) // FIXME check 200
+				body, _, _, err := ats.DownloadWithRetry(url, timeout, client, 5, 2*time.Second)
 				if err != nil {
 					slog.Error(err.Error())
 					return err
@@ -1066,7 +1066,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	html, _, _, err := ats.Download(informationExchangeURL, timeout, client) // FIXME check 200
+	html, _, _, err := ats.DownloadWithRetry(informationExchangeURL, timeout, client, 5, 2*time.Second)
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
