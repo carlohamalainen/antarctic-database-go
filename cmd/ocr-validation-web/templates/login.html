@@ -1,0 +1,15 @@
+{{ define "login" }}
+<div class="login">
+  <h1>OCR Validation</h1>
+  <form method="POST" action="/login" class="login-form">
+    <label>Username
+      <input name="username" autocomplete="username" autofocus required>
+    </label>
+    <label>Password
+      <input name="password" type="password" autocomplete="current-password" required>
+    </label>
+    {{ if .Error }}<div class="error">{{ .Error }}</div>{{ end }}
+    <button type="submit">Login</button>
+  </form>
+</div>
+{{ end }}

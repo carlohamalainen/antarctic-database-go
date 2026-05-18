@@ -1,10 +1,13 @@
-.PHONY: all clean build install test
+.PHONY: all clean build test vet run-web \
+        build-fulltext build-ocr build-prepare-pipeline \
+        build-ocr-validation-web build-ocr-users
 
 # Default target builds all binaries
 all: build
 
 # Build all commands
-build: build-fulltext build-ocr build-prepare-pipeline
+build: build-fulltext build-ocr build-prepare-pipeline \
+       build-ocr-validation-web build-ocr-users
 
 # Build run-fulltext command
 build-fulltext:
@@ -18,16 +21,28 @@ build-ocr:
 build-prepare-pipeline:
 	go build -o prepare-document-pipeline ./cmd/prepare-document-pipeline
 
-# Clean build artifacts
-clean:
-	rm -f run-fulltext run-ocr prepare-document-pipeline
+# --- OCR-validation toolkit ---
 
-# Install binaries to $GOPATH/bin
-# install:
-# 	go install ./cmd/run-fulltext
-# 	go install ./cmd/run-ocr
-# 	go install ./cmd/prepare-document-pipeline
+build-ocr-validation-web:
+	go build -o ocr-validation-web ./cmd/ocr-validation-web
 
-# Run tests
+build-ocr-users:
+	go build -o ocr-users ./cmd/ocr-users
+
+# Run the web server with debug logging
+run-web: build-ocr-validation-web
+	./ocr-validation-web -debug
+
+# --- Test / vet ---
+
 test:
-	go test -v ./...
+	go test -count=1 ./...
+
+vet:
+	go vet ./...
+
+# --- Clean ---
+
+clean:
+	rm -f run-fulltext run-ocr prepare-document-pipeline \
+	      ocr-validation-web ocr-users

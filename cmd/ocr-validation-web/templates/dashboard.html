@@ -1,0 +1,27 @@
+{{ define "dashboard" }}
+<div class="dashboard"
+     data-on:keydown__window="
+       !$loadingAction
+       && !evt.target.matches('input, textarea, [contenteditable]')
+       && !evt.metaKey && !evt.ctrlKey && !evt.altKey
+       && (
+         (evt.key === 'r' && @post('/review/start-new'))
+         || (evt.key === 's' && @post('/review/start-second-pass'))
+       )">
+  <header class="topbar">
+    <h1>OCR Validation</h1>
+    <div class="user">
+      <span>logged in as <strong>{{ .Username }}</strong></span>
+      <form method="POST" action="/logout" class="inline-form">
+        <button type="submit">logout</button>
+      </form>
+    </div>
+  </header>
+
+  {{ template "stats" . }}
+
+  {{ template "actions" . }}
+
+  <div id="review-section"></div>
+</div>
+{{ end }}

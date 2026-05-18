@@ -1,0 +1,18 @@
+[Unit]
+Description=OCR Validation Web Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ deploy_dir }}
+ExecStart={{ deploy_dir }}/ocr-validation-web \
+    -addr {{ bind_addr }} \
+    -db {{ deploy_dir }}/data/processed/document-pipeline.sqlite3 \
+    -val-db {{ deploy_dir }}/data/processed/ocr-validation.sqlite3 \
+    -users-db {{ deploy_dir }}/data/processed/ocr-users.sqlite3
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

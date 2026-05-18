@@ -1,0 +1,18 @@
+{{ define "actions" }}
+<div id="actions" class="actions" data-signals="{loadingAction: false}">
+  <button data-on:click="@post('/review/start-new')"
+          data-indicator="loadingAction"
+          data-attr:disabled="$loadingAction">Review New Sample <kbd>R</kbd></button>
+  {{ if gt .SecondPassCount 0 }}
+    <button data-on:click="@post('/review/start-second-pass')"
+            data-indicator="loadingAction"
+            data-attr:disabled="$loadingAction">Second-pass review <kbd>S</kbd></button>
+    <span class="hint">{{ .SecondPassCount }} sample(s) awaiting your 2nd review</span>
+  {{ else }}
+    <button disabled title="No samples currently need a 2nd review">Second-pass review <kbd>S</kbd></button>
+    <span class="hint">no samples currently need a 2nd reviewer</span>
+  {{ end }}
+  <a href="/details" class="link-button">Details</a>
+  <a href="/export" class="link-button">Export TSV</a>
+</div>
+{{ end }}

@@ -1,0 +1,89 @@
+---
+# Deploys ocr-validation-web + ocr-users to the homelab.
+#
+# Run: ansible-playbook -i inventory.ini deploy.yml
+#
+# Requires Go installed locally (build is cross-compiled with CGO_ENABLED=0).
+# Requires `pdftoppm` (poppler) installed on the remote (apt: poppler-utils,
+# fedora: poppler-utils). Service will fail to render images without it.
+#
+# This playbook does NOT touch data/processed contents — sync the source DB
+# manually. Existing ocr-validation.sqlite3 / ocr-users.sqlite3 on the
+# remote are left alone.
+
+- name: Deploy ocr-validation-web to homelab
+  hosts: homelab
+  gather_facts: false
+
+  vars:
+    remote_home: /home/carlo
+    deploy_dir: "{{ remote_home }}/ocr-review"
+    systemd_user_dir: "{{ remote_home }}/.config/systemd/user"
+    bind_addr: 0.0.0.0:13500
+    service_name: ocr-validation-web
+    binaries:
+      - ocr-validation-web
+      - ocr-users
+    build_dir: "{{ playbook_dir }}/.build"
+
+  tasks:
+    - name: Cross-compile binaries (pure-Go, static, linux/amd64)
+      delegate_to: localhost
+      run_once: true
+      environment:
+        GOOS: linux
+        GOARCH: amd64
+        CGO_ENABLED: "0"
+      ansible.builtin.command:
+        cmd: "go build -trimpath -o {{ build_dir }}/{{ item }} ./cmd/{{ item }}"
+        chdir: "{{ playbook_dir }}"
+      loop: "{{ binaries }}"
+
+    - name: Ensure deploy directory tree exists
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ deploy_dir }}"
+        - "{{ deploy_dir }}/data/processed"
+
+    - name: Copy binaries to remote
+      ansible.builtin.copy:
+        src: "{{ build_dir }}/{{ item }}"
+        dest: "{{ deploy_dir }}/{{ item }}"
+        mode: "0755"
+      loop: "{{ binaries }}"
+      notify: restart service
+
+    - name: Ensure systemd user directory exists
+      ansible.builtin.file:
+        path: "{{ systemd_user_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Install systemd user unit
+      ansible.builtin.template:
+        src: deploy/ocr-validation-web.service.j2
+        dest: "{{ systemd_user_dir }}/{{ service_name }}.service"
+        mode: "0644"
+      notify: restart service
+
+    - name: Reload systemd user daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+        scope: user
+
+    - name: Enable and start service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        scope: user
+        enabled: true
+        state: started
+
+  handlers:
+    - name: restart service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        scope: user
+        state: restarted

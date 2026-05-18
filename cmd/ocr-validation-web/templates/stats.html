@@ -1,0 +1,35 @@
+{{ define "stats" }}
+<section id="stats" class="stats" data-on:interval__duration.10s="@get('/dashboard/stats')">
+  <div class="kv-row">
+    <div class="kv"><div class="label">Total samples</div><div class="num">{{ .Stats.TotalSamples }}</div></div>
+    <div class="kv"><div class="label">Total reviews</div><div class="num">{{ .Stats.TotalReviews }}</div></div>
+  </div>
+
+  <div class="three-col">
+    <div>
+      <h3>Samples by creator</h3>
+      {{ if .Stats.SamplesByCreator }}<ul>{{ range .Stats.SamplesByCreator }}<li>{{ .Count }} &middot; {{ .Reviewer }}</li>{{ end }}</ul>{{ else }}<p class="muted">none yet</p>{{ end }}
+    </div>
+    <div>
+      <h3>Reviews by reviewer</h3>
+      {{ if .Stats.ReviewsByReviewer }}<ul>{{ range .Stats.ReviewsByReviewer }}<li>{{ .Count }} &middot; {{ .Reviewer }}</li>{{ end }}</ul>{{ else }}<p class="muted">none yet</p>{{ end }}
+    </div>
+    <div>
+      <h3>Reviews by verdict</h3>
+      {{ if .Stats.ReviewsByVerdict }}<ul>{{ range .Stats.ReviewsByVerdict }}<li>{{ .Count }} &middot; {{ .Reviewer }}</li>{{ end }}</ul>{{ else }}<p class="muted">none yet</p>{{ end }}
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div>
+      <h3>Samples by review-count <small>(target = 2)</small></h3>
+      {{ if .Stats.SamplesByNReviews }}<ul>{{ range .Stats.SamplesByNReviews }}<li>{{ .Samples }} sample(s) with {{ .NReviews }} review(s)</li>{{ end }}</ul>{{ else }}<p class="muted">none yet</p>{{ end }}
+    </div>
+    <div>
+      <h3>Second-pass eligibility</h3>
+      <p class="muted">samples with 1 review where this person would be the 2nd</p>
+      {{ if .Stats.SecondPassEligible }}<ul>{{ range .Stats.SecondPassEligible }}<li>{{ .Count }} &middot; {{ .Reviewer }}</li>{{ end }}</ul>{{ else }}<p class="muted">none yet</p>{{ end }}
+    </div>
+  </div>
+</section>
+{{ end }}

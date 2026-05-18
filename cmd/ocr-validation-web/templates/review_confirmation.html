@@ -1,0 +1,13 @@
+{{ define "review-confirmation" }}
+<div id="review-section" class="review">
+  <div class="confirmation">
+    <div class="check">&#10003;</div>
+    <div>
+      <strong>Saved review #{{ .ReviewID }}</strong> for sample #{{ .SampleID }}<br>
+      verdict: <code>{{ .Verdict }}</code><br>
+      at {{ .ReviewedAt }}
+    </div>
+  </div>
+  <p class="hint">Pick another sample above when you're ready.</p>
+</div>
+{{ end }}

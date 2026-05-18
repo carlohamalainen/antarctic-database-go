@@ -1,0 +1,65 @@
+{{ define "review-form" }}
+<div id="review-section" class="review">
+  <h2>{{ if .IsSecondPass }}Second-pass {{ end }}Sample #{{ .SampleID }}</h2>
+  <p class="meta">
+    page {{ .PageNr }} &middot;
+    x={{ printf "%.4f" .XFraction }} &middot; y={{ printf "%.4f" .YFraction }} &middot;
+    <a href="{{ .DocumentURL }}" target="_blank" rel="noopener">source PDF</a>
+  </p>
+  {{ if .IsSecondPass }}
+    <p class="hint">You are the second reviewer. The first reviewer's text is intentionally hidden so you can review independently.</p>
+  {{ end }}
+
+  <p class="instructions"><strong>Transcribe the words starting at the yellow circle and reading rightward</strong> &mdash; how many words to type will be specified verbally.</p>
+
+  <!-- Snippet: server-side cropped band around the marker circle, stored
+       as a BLOB on the samples row at creation time. Full page width so
+       the reviewer can read text continuing rightward of the circle. -->
+  <div class="snippet-frame">
+    <img src="/image/{{ .SampleID }}/snippet"
+         class="snippet-img"
+         alt="snippet around marker circle, page {{ .PageNr }}">
+  </div>
+
+  <form data-signals="{selectedVerdict: '', userText: ''}"
+        data-on:keydown__window="
+          !evt.target.matches('input, textarea, [contenteditable]')
+          && !evt.metaKey && !evt.ctrlKey && !evt.altKey
+          && (
+            (evt.key === 'n' && (evt.preventDefault(), $selectedVerdict = 'not_text', setTimeout(() => @post('/review/submit', {contentType: 'form'}), 0)))
+            || (evt.key === 't' && (evt.preventDefault(), $selectedVerdict = 'text', setTimeout(() => document.querySelector('textarea[name=user_text]')?.focus(), 0)))
+          )">
+    <input type="hidden" name="sample_id" value="{{ .SampleID }}">
+
+    <fieldset class="verdict">
+      <legend>Verdict</legend>
+      <label><input type="radio" name="verdict" data-bind="selectedVerdict" value="text"> <strong>text</strong> <kbd>T</kbd> &mdash; I can read the words clearly and will type them</label>
+      <label><input type="radio" name="verdict" data-bind="selectedVerdict" value="not_text"> <strong>not_text</strong> <kbd>N</kbd> &mdash; whitespace, figure, table (auto-submits)</label>
+      <label><input type="radio" name="verdict" data-bind="selectedVerdict" value="inconclusive"> <strong>inconclusive</strong> &mdash; ambiguous (between lines, multi-line block, etc.)</label>
+    </fieldset>
+
+    <div data-show="$selectedVerdict === 'text'" class="text-input">
+      <label>Type the words from the yellow circle (per the verbal instructions):<br>
+        <textarea name="user_text" rows="3" cols="80" data-bind="userText"></textarea>
+      </label>
+      <div class="word-count">
+        words: <span data-text="$userText.trim() === '' ? 0 : $userText.trim().split(/\s+/).length">0</span>
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button type="button"
+              data-on:click="@post('/review/submit', {contentType: 'form'})"
+              data-attr:disabled="!$selectedVerdict">SUBMIT</button>
+
+
+
+    </div>
+  </form>
+
+  <details class="full-page-details">
+    <summary>Full page (click to expand for context)</summary>
+    <img src="/image/{{ .SampleID }}/full" class="page-image" alt="full page {{ .PageNr }}">
+  </details>
+</div>
+{{ end }}

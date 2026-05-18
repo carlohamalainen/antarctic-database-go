@@ -1,0 +1,8 @@
+ocr-validation.nadiah.org {
+  log {
+    output stderr
+    format json
+  }
+
+  reverse_proxy homelab.tailcaec28.ts.net:13500
+}

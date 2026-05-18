@@ -23,6 +23,12 @@ go.work.sum
 
 # env file
 .env
+
+*.DS_Store
+.vscode/
+
+
+# data
 meetings.parquet
 
 # binaries
@@ -30,7 +36,11 @@ meetings.parquet
 /run-fulltext
 /run-ocr
 /information-exchange
+/ocr-validation-web
+/ocr-users
 
-# 
+#
 /data/processed/
 
+# Ansible cross-compile output
+/.build/

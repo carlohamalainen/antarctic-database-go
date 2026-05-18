@@ -1,0 +1,40 @@
+{{ define "details" }}
+<div class="details">
+  <header class="topbar">
+    <h1>OCR Validation &mdash; All Reviews</h1>
+    <div><a href="/">&larr; back</a> &middot; <a href="/export">Export TSV</a></div>
+  </header>
+  {{ if .Rows }}
+  <table class="reviews">
+    <thead><tr>
+      <th>reviewed at</th>
+      <th>reviewer</th>
+      <th>orig sampler</th>
+      <th>document</th>
+      <th>page</th>
+      <th>x</th>
+      <th>y</th>
+      <th>verdict</th>
+      <th>user text</th>
+    </tr></thead>
+    <tbody>
+    {{ range .Rows }}
+      <tr>
+        <td>{{ .ReviewedAt }}</td>
+        <td>{{ .ReviewUser }}</td>
+        <td>{{ .OriginalSampleUser }}</td>
+        <td><a href="{{ .DocumentURL }}" target="_blank" rel="noopener" title="{{ .DocumentID }}">{{ .DocumentIDShort }}</a></td>
+        <td>{{ .PageNr }}</td>
+        <td>{{ printf "%.4f" .XFraction }}</td>
+        <td>{{ printf "%.4f" .YFraction }}</td>
+        <td>{{ .Verdict }}</td>
+        <td>{{ .UserText }}</td>
+      </tr>
+    {{ end }}
+    </tbody>
+  </table>
+  {{ else }}
+  <p>No reviews yet.</p>
+  {{ end }}
+</div>
+{{ end }}
