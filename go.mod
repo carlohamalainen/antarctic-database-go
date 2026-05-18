@@ -1,6 +1,6 @@
 module github.com/carlohamalainen/antarctic-database-go
 
-go 1.24.9
+go 1.25.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.11.0
@@ -9,7 +9,7 @@ require (
 	github.com/elazarl/goproxy v1.8.1
 	github.com/hbollon/go-edlib v1.7.0
 	github.com/mattn/go-sqlite3 v1.14.34
-	github.com/parquet-go/parquet-go v0.27.0
+	github.com/parquet-go/parquet-go v0.29.0
 	github.com/starfederation/datastar-go v1.2.1
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	golang.org/x/crypto v0.48.0
