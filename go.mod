@@ -1,6 +1,6 @@
 module github.com/carlohamalainen/antarctic-database-go
 
-go 1.25.0
+go 1.24.9
 
 require (
 	github.com/PuerkitoBio/goquery v1.11.0
