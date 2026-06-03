@@ -10,7 +10,7 @@ require (
 	github.com/hbollon/go-edlib v1.7.0
 	github.com/mattn/go-sqlite3 v1.14.44
 	github.com/parquet-go/parquet-go v0.30.1
-	github.com/starfederation/datastar-go v1.2.1
+	github.com/starfederation/datastar-go v1.2.2
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	golang.org/x/crypto v0.52.0
 	golang.org/x/net v0.55.0
