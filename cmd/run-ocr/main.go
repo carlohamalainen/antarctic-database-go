@@ -188,9 +188,6 @@ func main() {
 	// nvidiaModel := "meta/llama-4-scout-17b-16e-instruct"
 	// nvidiaModel := "google/gemma-3-27b-it"
 
-	// Anthropic models
-	anthropicModel := "claude-3-7-sonnet-20250219"
-
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
 		Level:     slog.LevelDebug,
@@ -199,10 +196,13 @@ func main() {
 
 	pipelineDbFile := flag.String("pipeline-db-file", "", "Absolute path to sqlite pipeline database")
 	ocrService := flag.String("service", "nvidia", "OCR service to use: 'nvidia' or 'anthropic'")
+	anthropicModelFlag := flag.String("anthropic-model", "claude-haiku-4-5-20251001", "Anthropic model to use for OCR (only used when --service=anthropic)")
 	batchSize := flag.Int("batch-size", 10, "Number of pages to process in each batch")
 	useAssetUpload := flag.Bool("use-asset-upload", false, "If true, upload images to NVCF assets API. If false, use base64 encoding")
 
 	flag.Parse()
+
+	anthropicModel := *anthropicModelFlag
 
 	if *pipelineDbFile == "" {
 		slog.Error(fmt.Errorf("need -pipeline-db-file").Error())
