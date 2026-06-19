@@ -39,6 +39,7 @@ type FullText struct {
 }
 
 type PaperRecord struct {
+	DocumentID    string `parquet:"document_id,required"`
 	MeetingYear   int    `parquet:"meeting_year,required"`
 	MeetingType   string `parquet:"meeting_type,required"`
 	MeetingNumber int    `parquet:"meeting_number,required"`
@@ -50,7 +51,7 @@ type PaperRecord struct {
 	PayloadJson   string `parquet:"payload_json,required"`
 
 	PaperId       int    `parquet:"paper_id,required"`
-	PaperType     string `parquet:"party_type,required"`
+	PaperType     string `parquet:"paper_type,required"`
 	PaperName     string `parquet:"paper_name,required"`
 	PaperNumber   int    `parquet:"paper_number,required"`
 	PaperRevision int    `parquet:"paper_revision,required"`
@@ -811,8 +812,12 @@ func ingestManualDocuments(cache_ *cache.Cache, csvFile string, utasDir string) 
 			return nil, fmt.Errorf("failed to set cache for %s, error: %w", url, err)
 		}
 
+		// Same document ID as the pipeline's InsertDocument: Sha256sum(url +
+		// documentBytes). The cache is primed above with exactly these bytes, so
+		// the pipeline download reproduces the same hash.
 		record := PaperRecord{
-			PaperUrl: url,
+			DocumentID: Sha256sum(append([]byte(url), body...)),
+			PaperUrl:   url,
 		}
 
 		records = append(records, record)
@@ -1024,7 +1029,24 @@ func collectDocuments(timeout time.Duration, client *http.Client, quick bool) ([
 								return nil, fmt.Errorf("failed to convert meeting number to integer: %s %w", item.Meeting_number, err)
 							}
 
+							// Compute the document ID the same way the pipeline does in
+							// InsertDocument: Sha256sum(paperUrl + documentBytes). We must
+							// download the actual document here (not the listing page) so the
+							// hash matches documents.id in the pipeline sqlite DB. The client
+							// is cached, so SaveDocuments later reuses this fetch.
+							documentID := ""
+							if ok {
+								docBody, docCode, _, err := DownloadWithRetry(link.Url, timeout, client, 10, 2*time.Second)
+								if err != nil {
+									return nil, fmt.Errorf("failed to download document %s: %w", link.Url, err)
+								}
+								if docCode == 200 && !strings.Contains(string(docBody), "Page not found") {
+									documentID = Sha256sum(append([]byte(link.Url), docBody...))
+								}
+							}
+
 							paperRecord := PaperRecord{
+								DocumentID:    documentID,
 								MeetingYear:   item.Meeting_year,
 								MeetingType:   item.Meeting_type,
 								MeetingNumber: meetingNumber,
