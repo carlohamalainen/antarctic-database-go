@@ -38,9 +38,11 @@ meetings.parquet
 /information-exchange
 /ocr-validation-web
 /ocr-users
+/extract-documents
 
 #
 /data/processed/
+/data/external/
 
 # Ansible cross-compile output
 /.build/
