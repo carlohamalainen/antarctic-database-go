@@ -8,7 +8,7 @@ require (
 	github.com/dop251/goja v0.0.0-20260311135729-065cd970411c
 	github.com/elazarl/goproxy v1.8.4
 	github.com/hbollon/go-edlib v1.7.0
-	github.com/mattn/go-sqlite3 v1.14.45
+	github.com/mattn/go-sqlite3 v1.14.46
 	github.com/parquet-go/parquet-go v0.30.1
 	github.com/starfederation/datastar-go v1.2.2
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
